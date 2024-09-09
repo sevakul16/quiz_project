@@ -1,49 +1,34 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
+
 import QUESTIONS from "../questions.js";
-import quizCompleteImage from "../assets/quiz-complete.png";
+import quizCompleteImg from "../assets/quiz-complete.png";
 import Question from "./Question.jsx";
 
-const Quiz = () => {
-  const [answerState, setAnswerState] = useState("");
+export default function Quiz() {
   const [userAnswers, setUserAnswers] = useState([]);
 
-  const activeQuestionIndex =
-    answerState === "" ? userAnswers.length : userAnswers.length - 1;
+  const activeQuestionIndex = userAnswers.length;
+  const quizIsComplete = activeQuestionIndex === QUESTIONS.length;
 
-  const quizIsOver = activeQuestionIndex === QUESTIONS.length;
-
-  const handleSelectAnswer = useCallback(
-    function handleSelectAnswer(answer) {
-      setAnswerState("answered");
-      setUserAnswers((prevUserAnswers) => {
-        return [...prevUserAnswers, answer];
-      });
-
-      setTimeout(() => {
-        if (answer === QUESTIONS[activeQuestionIndex].answers[0]) {
-          setAnswerState("correct");
-        } else {
-          setAnswerState("wrong");
-        }
-
-        setTimeout(() => {
-          setAnswerState("");
-        }, 2000);
-      }, 1000);
-    },
-    [activeQuestionIndex]
-  );
+  const handleSelectAnswer = useCallback(function handleSelectAnswer(
+    selectedAnswer
+  ) {
+    setUserAnswers((prevUserAnswers) => {
+      return [...prevUserAnswers, selectedAnswer];
+    });
+  },
+  []);
 
   const handleSkipAnswer = useCallback(
     () => handleSelectAnswer(null),
     [handleSelectAnswer]
   );
 
-  if (quizIsOver) {
+  if (quizIsComplete) {
     return (
       <div id="summary">
-        <img src={quizCompleteImage} />
-        <h1>Quiz Complete!</h1>
+        <img src={quizCompleteImg} alt="Trophy icon" />
+        <h2>Quiz Completed!</h2>
       </div>
     );
   }
@@ -52,15 +37,10 @@ const Quiz = () => {
     <div id="quiz">
       <Question
         key={activeQuestionIndex}
-        questionText={QUESTIONS[activeQuestionIndex].text}
-        answers={QUESTIONS[activeQuestionIndex].answers}
-        onSelect={handleSelectAnswer}
-        selectedAnswer={userAnswers[userAnswers.length - 1]}
-        answerState={answerState}
+        index={activeQuestionIndex}
+        onSelectAnswer={handleSelectAnswer}
         onSkipAnswer={handleSkipAnswer}
       />
     </div>
   );
-};
-
-export default Quiz;
+}
